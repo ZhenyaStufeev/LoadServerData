@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoadServerData", "LoadServerData\LoadServerData.csproj", "{F4BEDECB-2DC2-44E1-89A0-84DC2F388828}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{D70804FA-108A-4301-9952-90D110AF700C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreRCON", "CoreRCON\CoreRCON.csproj", "{CA1C9E63-9158-4143-B1B3-A02602BDE381}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinecraftServerHandler", "MinecraftServerHandler\MinecraftServerHandler.csproj", "{751E4482-CE5C-4A86-BE96-C47A0EF8BC2F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR", "SignalR\SignalR.csproj", "{D375364B-09B0-4C5E-8892-1BE545B7E9A3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MineStat", "CSharp\MineStat\MineStat.csproj", "{11EDD760-FC1E-4BC0-8ED4-8F6D8FF97779}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinecraftStatistics", "MinecraftStatistics\MinecraftStatistics.csproj", "{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F4BEDECB-2DC2-44E1-89A0-84DC2F388828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4BEDECB-2DC2-44E1-89A0-84DC2F388828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4BEDECB-2DC2-44E1-89A0-84DC2F388828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4BEDECB-2DC2-44E1-89A0-84DC2F388828}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D70804FA-108A-4301-9952-90D110AF700C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D70804FA-108A-4301-9952-90D110AF700C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D70804FA-108A-4301-9952-90D110AF700C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D70804FA-108A-4301-9952-90D110AF700C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA1C9E63-9158-4143-B1B3-A02602BDE381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA1C9E63-9158-4143-B1B3-A02602BDE381}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA1C9E63-9158-4143-B1B3-A02602BDE381}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA1C9E63-9158-4143-B1B3-A02602BDE381}.Release|Any CPU.Build.0 = Release|Any CPU
+		{751E4482-CE5C-4A86-BE96-C47A0EF8BC2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{751E4482-CE5C-4A86-BE96-C47A0EF8BC2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{751E4482-CE5C-4A86-BE96-C47A0EF8BC2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{751E4482-CE5C-4A86-BE96-C47A0EF8BC2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D375364B-09B0-4C5E-8892-1BE545B7E9A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D375364B-09B0-4C5E-8892-1BE545B7E9A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D375364B-09B0-4C5E-8892-1BE545B7E9A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D375364B-09B0-4C5E-8892-1BE545B7E9A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {538E2259-164C-4974-819B-93C8B8A5D9FE}
+	EndGlobalSection
+EndGlobal

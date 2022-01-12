@@ -1,0 +1,125 @@
+/* Provide sufficient contrast against white background */
+
+a {
+  color: #0366d6;
+}
+
+code {
+  color: #E01A76;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.ServerConsoleOut {
+  list-style: none;
+  background: #28262e;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  max-height: 440px;
+  height: 440px;
+  overflow-y: scroll;
+}
+
+.console-input-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.console-input-block>.control>.buttons {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+
+.console-input-block>.control>.buttons>.btn {
+  margin-bottom: 5px;
+}
+
+.console-input-block>div>textarea {
+  max-height: 70px;
+  background-color: #28262e;
+  color: white;
+  margin-right: 10px;
+}
+
+.console-input-block>div>textarea:focus {
+  color: white;
+  box-shadow: 0 0 0 0.25rem rgb(0 0 0 / 25%);
+  border-color: gray;
+  background-color: #28262e;
+}
+
+.server-handlers {
+  display: flex;
+  flex-direction: column;
+}
+
+.server-manipulate-block {
+  padding: 10px;
+  border: 0.5px solid silver;
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.server-links {
+  display: flex;
+}
+
+.server-links>.btn {
+  margin-right: 5px;
+}
+
+.btn-outline-info:hover, .btn-outline-info:focus {
+  color: white;
+}
+
+.console-input-block>.control {
+  display: flex;
+  padding-top: 20px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 50px;
+}
+
+.sendButton {
+  border: 1px solid silver;
+  border-radius: 50%;
+  font-size: 30px;
+  padding: 8px;
+  background: #28262e;
+  color: white;
+  min-width: 50px;
+  min-height: 50px;
+  position: relative;
+  top: 50%;
+  /* box-shadow: 0 0 0 0.25rem rgb(0 0 0 / 25%); */
+  transition: all 0.4s;
+}
+
+.sendButton::before
+{
+  position: absolute;
+  top: 10px;
+}
+
+.sendButton:hover,
+.sendButton:focus
+{
+  box-shadow: 0 0 0 0.25rem rgb(0 0 0 / 25%);
+  cursor: pointer;
+}
+
+.input-control {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
