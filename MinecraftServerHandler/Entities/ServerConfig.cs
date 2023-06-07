@@ -21,6 +21,5 @@ namespace MinecraftServerHandler.Entities
         public int ServerPort { get; set; }
         public string SchemDirectory { get; set; }
 
-
     }
 }

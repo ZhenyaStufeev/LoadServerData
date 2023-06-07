@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31321.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoadServerData", "LoadServerData\LoadServerData.csproj", "{F4BEDECB-2DC2-44E1-89A0-84DC2F388828}"
 EndProject
@@ -13,9 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinecraftServerHandler", "M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR", "SignalR\SignalR.csproj", "{D375364B-09B0-4C5E-8892-1BE545B7E9A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MineStat", "CSharp\MineStat\MineStat.csproj", "{11EDD760-FC1E-4BC0-8ED4-8F6D8FF97779}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinecraftStatistics", "MinecraftStatistics\MinecraftStatistics.csproj", "{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinecraftStatistics", "MinecraftStatistics\MinecraftStatistics.csproj", "{FFCC1AFA-FE6E-49F5-BAE6-1194543A38DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -33,8 +33,8 @@ namespace LoadServerData
             });
             services.AddSignalR();
             services.AddHostedService<SignalR.SignalRHost>();
-            services.AddScoped<Settings, Settings>(settings => new Settings(Directory.GetCurrentDirectory(), "config.json"));
-            services.AddScoped<ServerService, ServerService>();
+            services.AddSingleton<Settings, Settings>(settings => new Settings(Directory.GetCurrentDirectory(), "config.json"));
+            services.AddSingleton<ServerService, ServerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +51,7 @@ namespace LoadServerData
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
@@ -73,7 +73,7 @@ namespace LoadServerData
 
                 if (env.IsDevelopment())
                 {
-                    //spa.UseReactDevelopmentServer(npmScript: "start");
+                    spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
         }

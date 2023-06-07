@@ -241,8 +241,6 @@ namespace MineStatLib
 
                 // the max player count
                 MaximumPlayersInt = Convert.ToInt32(root.XPathSelectElement("//players/max")?.Value);
-
-                var temp = root.XPathSelectElements("//players/sample/item").ToList();
             }
             catch (Exception)
             {

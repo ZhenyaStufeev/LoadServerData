@@ -45,6 +45,8 @@ export default class Home extends Component {
           <h6>{"Онлайн: " + item.currentOnline + " из " + item.maxOnline}</h6>
           <h6>{"Версия сервера: " + item.serverVersion}</h6>
           <h6>{"MOTD сервера: " + item.serverMotd}</h6>
+          <h6>{"Выделено ОЗУ: " + (item.allocatedMemmory / (1024 * 1024)) + " МБ"}</h6>
+          <h6>{"Потребление ОЗУ: " + (item.memmoryUsage / (1024 * 1024)) + " МБ"}</h6>
           <br />
           <div className="server-links">
             <Link className="btn btn-outline-secondary" to={"/server/" + item.serverName + "/console"} >Консоль</Link>

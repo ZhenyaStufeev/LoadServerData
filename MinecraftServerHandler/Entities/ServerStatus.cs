@@ -15,5 +15,7 @@ namespace MinecraftServerHandler.Entities
         public string ServerVersion { get; set; }
         public string ServerMotd { get; set; }
         public string ServerName { get; set; }
+        public long MemmoryUsage { get; set; }
+        public long AllocatedMemmory { get; set; }
     }
 }

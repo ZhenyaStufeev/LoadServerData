@@ -7,6 +7,7 @@ using CoreRCON.Parsers.Standard;
 using System;
 using MineStatLib;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ConsoleApp1
 {
@@ -21,26 +22,33 @@ namespace ConsoleApp1
             //Console.ReadLine();
             //var log = new LogReceiver(50000, new IPEndPoint(IPAddress.Parse("92.52.138.234"), 25565));
 
-            MineStat ms = new MineStat("mrkot9pa.pp.ua", 25565);
-            Console.WriteLine("Minecraft server status of {0} on port {1}:", ms.Address, ms.Port);
+
+
+
+            MineStat ms = new MineStat("play.kot9pa.com", 25565);
+            //MineStat ms = new MineStat("146.59.185.73", 25565);
+            Console.WriteLine("Сервер {0}:{1}", ms.Address, ms.Port);
             if (ms.ServerUp)
             {
-                Console.WriteLine("Server is online running version {0} with {1} out of {2} players.", ms.Version, ms.CurrentPlayers, ms.MaximumPlayers);
-                Console.WriteLine("Message of the day: {0}", ms.Motd);
-                Console.WriteLine("Latency: {0}ms", ms.Latency);
+                Console.WriteLine("Играет {0} из {1} игроков", ms.CurrentPlayers, ms.MaximumPlayers);
+                Console.WriteLine("Версия сервера: {0}", ms.Version);
+                Console.WriteLine("Описание сервера: {0}", ms.Motd);
+                Console.WriteLine("Отклик: {0}ms", ms.Latency);
+
             }
             else
                 Console.WriteLine("Server is offline!");
+
         }
-    }
+}
 
 
 
-    public class ColorLineParams
-    {
-        public string ColorType { get; set; }
-        public string Line { get; set; }
-    }
+public class ColorLineParams
+{
+    public string ColorType { get; set; }
+    public string Line { get; set; }
+}
 
 
 }

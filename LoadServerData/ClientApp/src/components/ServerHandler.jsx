@@ -3,6 +3,8 @@ import React, { Component, useState, useEffect, useRef } from 'react';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Redirect } from "react-router-dom"
 import { Router } from "react-router";
+import parse from "html-react-parser";
+
 let connection = new HubConnectionBuilder()
   .withUrl("/signalr")
   .build();
@@ -12,7 +14,7 @@ export default class ServerHandler extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      messages: [],
+      // messages: [],
       IsConnected: true,
       IsNotCorrect: false,
       ServerName: "",
@@ -25,7 +27,9 @@ export default class ServerHandler extends Component {
         serverIp: "Не известно",
         serverVersion: "Не известно",
         serverMotd: "Не известно",
-        serverName: this.ServerName
+        serverName: this.ServerName,
+        allocatedMemmory: 0,
+        memmoryUsage: 0
       },
       lastCountOfMessages: 0,
       currentInterval: null
@@ -41,10 +45,11 @@ export default class ServerHandler extends Component {
 
   Receive = (servername) => {
     connection.on(servername, data => {
-      let message_array = this.state.messages;
-      message_array.push(data);
-
-      this.setState({ messages: message_array });
+      let count_of_messages = this.state.lastCountOfMessages;
+      count_of_messages += 1;
+      let parent_out = document.getElementById("ServerConsoleOut");
+      parent_out.innerHTML += "<li>" + data + "</li>";
+      this.setState({lastCountOfMessages: count_of_messages});
     })
   }
 
@@ -68,7 +73,7 @@ export default class ServerHandler extends Component {
   componentDidMount = () => {
     let server = window.location.pathname;
     server = server.replace("/server/", "").replace("/console", "");
-    if (server.length == 0) {
+    if (server.length === 0) {
       this.setState({ IsNotCorrect: true })
     }
     else {
@@ -88,47 +93,64 @@ export default class ServerHandler extends Component {
   }
 
   GetStatus = (server) => {
-    axios.get(window.location.origin + "/api/Server/getserverstatus/" + server).then(status_result => {
-      let st_obj = {
-        currentOnline: status_result.data.currentOnline,
-        isWorking: status_result.data.isWorking,
-        maxOnline: status_result.data.maxOnline,
-        serverIp: status_result.data.serverIp,
-        serverVersion: status_result.data.serverVersion,
-        serverMotd: status_result.data.serverMotd,
-        serverName: status_result.data.serverName
-      };
-      this.setState({ ServerStatus: st_obj });
-    });
+    try {
+      axios.get(window.location.origin + "/api/Server/getserverstatus/" + server).then(status_result => {
+        let st_obj = {
+          currentOnline: status_result.data.currentOnline,
+          isWorking: status_result.data.isWorking,
+          maxOnline: status_result.data.maxOnline,
+          serverIp: status_result.data.serverIp,
+          serverVersion: status_result.data.serverVersion,
+          serverMotd: status_result.data.serverMotd,
+          serverName: status_result.data.serverName,
+          allocatedMemmory: status_result.data.allocatedMemmory,
+          memmoryUsage: status_result.data.memmoryUsage
+        };
+        this.setState({ ServerStatus: st_obj });
+      });
+    }
+    catch
+    {
+
+    }
   }
 
   RenderMessages() {
-    let messages = this.state.messages;
-    let res_messages = [];
-    for (let i = 0; i < messages.length; ++i) {
-      let li;
-      if ((messages.length - 1) === i) {
-        li = <li key={i} dangerouslySetInnerHTML={{ __html: messages[i] }} id="last-message"></li>
-      }
-      else {
-        li = <li key={i} dangerouslySetInnerHTML={{ __html: messages[i] }}></li>
-      }
-      res_messages.push(li);
-    }
-    return res_messages;
+    // let messages = this.state.messages;
+    // let res_messages = [];
+    // for (let i = 0; i < messages.length; ++i) {
+    //   let li;
+    //   if ((messages.length - 1) === i) {
+    //     li = <li key={i} dangerouslySetInnerHTML={{ __html: messages[i] }} id="last-message"></li>
+    //   }
+    //   else {
+    //     li = <li key={i} dangerouslySetInnerHTML={{ __html: messages[i] }}></li>
+    //   }
+    //   res_messages.push(li);
+    // }
+    // console.log(messages);
+    // return messages.map((item, key) => {
+    //   //let li = <li key={key}>{item}</li>;
+    //   //let li = <li key={key}>{item}</li>
+    //   let li = React.createElement("li", {}, parse(item));
+
+    //   // li.props.children
+    //   // li.innerHTML = item;
+    //   return li;
+    // });
+    // return res_messages;
   }
 
   OnKeyDown = (e) => {
     if (e.keyCode === 13 && e.shiftKey === false) {
       e.preventDefault();
-      this.SendMessage(this.state.inputText );
+      this.SendMessage(this.state.inputText);
     }
   }
 
-  SendMessage = (message) =>
-  {
+  SendMessage = (message) => {
     this.setState({ inputText: "" })
-    return axios.post(window.location.origin + "/api/Server/sendcommand", { ServerName: this.state.ServerName, Command: message});
+    return axios.post(window.location.origin + "/api/Server/sendcommand", { ServerName: this.state.ServerName, Command: message });
   }
 
   areaOnChange = (e) => {
@@ -163,25 +185,20 @@ export default class ServerHandler extends Component {
 
   componentDidUpdate = () => {
     if (this.state.autoScroll === true) {
-      let last_message = document.getElementById("last-message");
-      if (last_message != null) {
-        if (this.state.lastCountOfMessages != this.state.messages.length) {
-          last_message.scrollIntoView({ behavior: "smooth" });
-          this.setState({ lastCountOfMessages: this.state.messages.length })
-        }
-      }
+      let parent_out = document.getElementById("ServerConsoleOut");
+      parent_out.scrollTop = parent_out.scrollHeight;
     }
   }
 
   componentWillUnmount = () => {
-    clearInterval(this.state.currentInterval);
+    if (this.state.currentInterval != null)
+      clearInterval(this.state.currentInterval);
   }
 
-SendCommandStop = () =>
-{
-  this.props.sendNotify("tr", "success", "Команда на выполение остановки сервера отправлена. Ожидайте ответа сервера.", "pe-7s-power");
-  this.SendMessage("stop");
-}
+  SendCommandStop = () => {
+    this.props.sendNotify("tr", "success", "Команда на выполение остановки сервера отправлена. Ожидайте ответа сервера.", "pe-7s-power");
+    this.SendMessage("stop");
+  }
 
   render() {
 
@@ -192,14 +209,17 @@ SendCommandStop = () =>
         <h5 style={{ fontWeight: "bold" }}>Консоль сервера: <span style={{ textDecoration: "underline", color: "#AA0000", fontWeight: "bold" }}>{item.serverName}</span></h5>
         <br />
         <h6>{"IP сервера: " + item.serverIp}</h6>
-        <h6><span>Статус: {item.isWorking == true ? <span style={{ color: "#55FF55" }}>Работает</span> : <span style={{ color: "#FF5555" }}>Выключен</span>}</span></h6>
+        <h6><span>Статус: {item.isWorking === true ? <span style={{ color: "#55FF55" }}>Работает</span> : <span style={{ color: "#FF5555" }}>Выключен</span>}</span></h6>
         <h6>{"Онлайн: " + item.currentOnline + " из " + item.maxOnline}</h6>
         <h6>{"Версия сервера: " + item.serverVersion}</h6>
         <h6>{"MOTD сервера: " + item.serverMotd}</h6>
+        <h6>{"Выделено ОЗУ: " + (item.allocatedMemmory / (1024 * 1024)) + " МБ"}</h6>
+        <h6>{"Потребление ОЗУ: " + (item.memmoryUsage / (1024 * 1024)) + " МБ"}</h6>
         <br />
 
-        <ul className="ServerConsoleOut">
-          {this.RenderMessages()}
+        <ul className="ServerConsoleOut" id="ServerConsoleOut">
+          {/* {this.RenderMessages()} */}
+
         </ul>
         <div className="console-input-block">
           <div className="input-control">
@@ -209,8 +229,8 @@ SendCommandStop = () =>
           <div className="control">
             <div className="buttons">
               <button className="btn btn-success" onClick={this.onStartServer} disabled={this.state.ServerStatus.isWorking}>Запустить сервер</button>
-              <button className="btn btn-warning" onClick={this.SendCommandStop} disabled={this.state.ServerStatus.isWorking == false ? true : false}>Безопасное отключение сервера</button>
-              <button className="btn btn-danger" onClick={this.OnStopServer} disabled={this.state.ServerStatus.isWorking == false ? true : false}>Экстренное выключение сервера</button>
+              <button className="btn btn-warning" onClick={this.SendCommandStop} disabled={this.state.ServerStatus.isWorking === false ? true : false}>Безопасное отключение сервера</button>
+              <button className="btn btn-danger" onClick={this.OnStopServer} disabled={this.state.ServerStatus.isWorking === false ? true : false}>Экстренное выключение сервера</button>
             </div>
             <div class="form-check">
               <input onChange={() => {

@@ -16,18 +16,16 @@ namespace MinecraftServerHandler.Utils
     public class ServerService
     {
         private static List<ServerHandler> serverHandlers = new();
+        private static List<ServerMonitor> serverMonitor = new();
         private ColorBuilder colorBuilder;
         private static bool firstLoading = true;
-        //public static List<ServerHandler> ServerHandlers { get => serverHandlers; private set => serverHandlers = value; }
         public Settings _settings;
-        //RCON rcon;
         public ServerService(Settings settings)
         {
             _settings = settings;
             InitServerHandlers();
             colorBuilder = new ColorBuilder(_settings.ColorTags);
         }
-
         public ServerInfoResult GetServerInfo(string serverName)
         {
             var serverConfig = _settings.ServerConfigs.FirstOrDefault(p => p.ServerName == serverName);
@@ -40,7 +38,7 @@ namespace MinecraftServerHandler.Utils
         }
         public List<ServerStatus> GetServersInfo()
         {
-            return serverHandlers.Select(p => GetServerStatus(p)).ToList();
+            return serverMonitor.Select(s_monitor => s_monitor.ServerStatus).ToList();
         }
         public bool SubscribeToSignalRServer(string ServerName, bool IsEnabledColor = true)
         {
@@ -85,13 +83,24 @@ namespace MinecraftServerHandler.Utils
         {
             if (firstLoading == true)
             {
-                serverHandlers.AddRange(_settings.ServerConfigs.Select(server_config => new ServerHandler(server_config)));
+                _settings.ServerConfigs.ForEach(server_config =>
+                {
+                    ServerHandler handler = new ServerHandler(server_config);
+                    serverHandlers.Add(handler);
+
+                    ServerMonitor monitor = new ServerMonitor(handler);
+                    serverMonitor.Add(monitor);
+                });
+
                 firstLoading = false;
             }
         }
         public bool RunServer(string ServerName)
         {
-            return serverHandlers.FirstOrDefault(sh => sh.ServerConfig.ServerName == ServerName).StartServer();
+            var server_monitor = serverMonitor.FirstOrDefault(sm => sm.ServerHandler.ServerConfig.ServerName == ServerName);
+            server_monitor.RunUpdateTimer(2000);
+            var server_handler = server_monitor.ServerHandler;
+            return server_handler.StartServer();
         }
         public bool SendCommand(CommandQuery query)
         {
@@ -113,7 +122,8 @@ namespace MinecraftServerHandler.Utils
         }
         public bool KillServerProcess(string ServerName)
         {
-            ServerHandler current_server = serverHandlers.FirstOrDefault(p => p.ServerConfig.ServerName == ServerName);
+            var server_monitor = serverMonitor.FirstOrDefault(sm => sm.ServerHandler.ServerConfig.ServerName == ServerName);
+            ServerHandler current_server = server_monitor.ServerHandler;
             if (current_server == null)
             {
                 return false;
@@ -123,50 +133,11 @@ namespace MinecraftServerHandler.Utils
         }
         public ServerStatus GetServerStatus(string ServerName)
         {
-            ServerHandler current_server = serverHandlers.FirstOrDefault(p => p.ServerConfig.ServerName == ServerName);
-            return GetServerStatus(current_server);
-        }
-        private ServerStatus GetServerStatus(ServerHandler current_server)
-        {
-            if (current_server == null)
-            {
-                return null;
-            }
-            ServerStatus serverStatus = new ServerStatus();
-            serverStatus.CurrentOnline = -1;
-            serverStatus.IsWorking = current_server.ServerIsWorking;
-            serverStatus.MaxOnline = -1;
-            serverStatus.ServerIp = current_server.ServerConfig.ServerIp + ":" + current_server.ServerConfig.ServerPort;
-            serverStatus.ServerVersion = "Не известно";
-            serverStatus.ServerMotd = "Не известно";
-            serverStatus.ServerName = current_server.ServerConfig.ServerName;
-
-            if (current_server == null || current_server.ServerIsWorking == false)
-            {
-                return serverStatus;
-            }
-            MineStat ms = null;
-            try
-            {
-                ms = new MineStat(current_server.ServerConfig.ServerIp, Convert.ToUInt16(current_server.ServerConfig.ServerPort));
-            }
-            catch
-            {
-                return serverStatus;
-            }
-
-            if (!ms.ServerUp)
-            {
-                return serverStatus;
-            }
-
-            serverStatus.CurrentOnline = ms.CurrentPlayersInt;
-            serverStatus.IsWorking = current_server.ServerIsWorking;
-            serverStatus.MaxOnline = ms.MaximumPlayersInt;
-            serverStatus.ServerVersion = ms.Version;
-            serverStatus.ServerMotd = ms.Motd;
-
-            return serverStatus;
+            //ServerHandler current_server = serverHandlers.FirstOrDefault(p => p.ServerConfig.ServerName == ServerName);
+            var server_monitor = serverMonitor.FirstOrDefault(s_monitor
+                                => s_monitor.ServerHandler.ServerConfig.ServerName
+                                == ServerName);
+            return server_monitor.ServerStatus;
         }
     }
 }
