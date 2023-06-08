@@ -1,248 +1,239 @@
 import axios from 'axios';
-import React, { Component, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Redirect } from "react-router-dom"
-import { Router } from "react-router";
-import parse from "html-react-parser";
 
-let connection = new HubConnectionBuilder()
-  .withUrl("/signalr")
-  .build();
 
-export default class ServerHandler extends Component {
+const ServerHandler = (props) => {
+  const [isConnected, setIsConnected] = useState(true);
+  const [isNotCorrect, setIsNotCorrect] = useState(false);
+  const [serverName, setServerName] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [serverStatus, setServerStatus] = useState({
+    currentOnline: -1,
+    isWorking: false,
+    maxOnline: -1,
+    serverIp: "Не известно",
+    serverVersion: "Не известно",
+    serverMotd: "Не известно",
+    serverName: "",
+    allocatedMemmory: 0,
+    memmoryUsage: 0
+  });
+  const [lastCountOfMessages, setLastCountOfMessages] = useState(0);
+  const mountedRef = useRef(false); // Добавляем useRef для отслеживания размонтирования компонента
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      // messages: [],
-      IsConnected: true,
-      IsNotCorrect: false,
-      ServerName: "",
-      inputText: "",
-      autoScroll: true,
-      ServerStatus: {
-        currentOnline: -1,
-        isWorking: false,
-        maxOnline: -1,
-        serverIp: "Не известно",
-        serverVersion: "Не известно",
-        serverMotd: "Не известно",
-        serverName: this.ServerName,
-        allocatedMemmory: 0,
-        memmoryUsage: 0
-      },
-      lastCountOfMessages: 0,
-      currentInterval: null
-    }
-    //    this.Receive("Mohist 1.12.2");
+  const connectionRef = useRef(null);
 
-    this.Receive = this.Receive.bind(this);
-    this.ConnectSignalRServer = this.ConnectSignalRServer.bind(this);
-    this.DisconnectSignalRServer = this.DisconnectSignalRServer.bind(this);
-    // this.OpenOrCloseConnection(true);
-    //  this.ConnectSignalRServer();
-  }
-
-  Receive = (servername) => {
-    connection.on(servername, data => {
-      let count_of_messages = this.state.lastCountOfMessages;
+  const Receive = (servername) => {
+    connectionRef.current.on(servername, data => {
+      let count_of_messages = lastCountOfMessages;
       count_of_messages += 1;
       let parent_out = document.getElementById("ServerConsoleOut");
       parent_out.innerHTML += "<li>" + data + "</li>";
-      this.setState({lastCountOfMessages: count_of_messages});
+      setLastCountOfMessages(count_of_messages);
+      if (autoScroll)
+        parent_out.scrollTop = parent_out.scrollHeight;
     })
   }
 
-  ConnectSignalRServer() {
-    connection.start().then(() => {
-      this.setState({ IsConnected: true });
-      console.log("CONNECTED");
-    }).catch((err) => {
-      this.setState({ IsConnected: false })
-    });
+  const ConnectSignalRServer = () => {
+    connectionRef.current
+      .start()
+      .then(() => {
+        console.log("CONNECTED");
+      })
+      .catch((err) => {
+        setIsConnected(false);
+      });
+  };
 
-  }
-
-  DisconnectSignalRServer() {
-    if (this.state.IsConnected === true) {
-      connection.stop().then().catch((err) => console.log(err));
-      this.setState({ IsConnected: false });
+  const DisconnectSignalRServer = () => {
+    if (connectionRef.current && connectionRef.current.state === "Connected") {
+      connectionRef.current
+        .stop()
+        .then(() => {
+          console.log("DISCONNECTED");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-  }
+  };
 
-  componentDidMount = () => {
+  useEffect(() => {
+    mountedRef.current = true; // Устанавливаем значение true при монтировании компонента
     let server = window.location.pathname;
     server = server.replace("/server/", "").replace("/console", "");
+    let interv = null;
     if (server.length === 0) {
-      this.setState({ IsNotCorrect: true })
-    }
-    else {
-      this.ConnectSignalRServer();
+      setIsNotCorrect(true);
+    } else {
+      connectionRef.current = new HubConnectionBuilder()
+        .withUrl("/signalr")
+        .build();
+
+      connectionRef.current.onclose(() => {
+        setIsConnected(false);
+      });
+
+      ConnectSignalRServer();
+
       let decodedUrl = decodeURI(server);
-      this.Receive(decodedUrl);
-      this.GetStatus(server);
-      let interv = setInterval(() => {
-        this.GetStatus(server);
+
+      if (connectionRef.current) {
+        connectionRef.current.off();
+      }
+
+      Receive(decodedUrl);
+      GetStatus(server);
+      interv = setInterval(() => {
+        GetStatus(server);
       }, 5000);
-      this.setState({ currentInterval: interv });
 
       axios.post(window.location.origin + "/api/Server/subscribesignalrserver", { ServerName: decodedUrl }).then(() => {
-      })
-      this.setState({ ServerName: decodedUrl });
-    }
-  }
-
-  GetStatus = (server) => {
-    try {
-      axios.get(window.location.origin + "/api/Server/getserverstatus/" + server).then(status_result => {
-        let st_obj = {
-          currentOnline: status_result.data.currentOnline,
-          isWorking: status_result.data.isWorking,
-          maxOnline: status_result.data.maxOnline,
-          serverIp: status_result.data.serverIp,
-          serverVersion: status_result.data.serverVersion,
-          serverMotd: status_result.data.serverMotd,
-          serverName: status_result.data.serverName,
-          allocatedMemmory: status_result.data.allocatedMemmory,
-          memmoryUsage: status_result.data.memmoryUsage
-        };
-        this.setState({ ServerStatus: st_obj });
       });
+      setServerName(decodedUrl);
     }
-    catch
-    {
 
-    }
-  }
+    return () => {
+      mountedRef.current = false; // Устанавливаем значение false при размонтировании компонента
+      clearInterval(interv);
+      DisconnectSignalRServer();
 
-  RenderMessages() {
-    // let messages = this.state.messages;
-    // let res_messages = [];
-    // for (let i = 0; i < messages.length; ++i) {
-    //   let li;
-    //   if ((messages.length - 1) === i) {
-    //     li = <li key={i} dangerouslySetInnerHTML={{ __html: messages[i] }} id="last-message"></li>
-    //   }
-    //   else {
-    //     li = <li key={i} dangerouslySetInnerHTML={{ __html: messages[i] }}></li>
-    //   }
-    //   res_messages.push(li);
-    // }
-    // console.log(messages);
-    // return messages.map((item, key) => {
-    //   //let li = <li key={key}>{item}</li>;
-    //   //let li = <li key={key}>{item}</li>
-    //   let li = React.createElement("li", {}, parse(item));
-
-    //   // li.props.children
-    //   // li.innerHTML = item;
-    //   return li;
-    // });
-    // return res_messages;
-  }
-
-  OnKeyDown = (e) => {
-    if (e.keyCode === 13 && e.shiftKey === false) {
-      e.preventDefault();
-      this.SendMessage(this.state.inputText);
-    }
-  }
-
-  SendMessage = (message) => {
-    this.setState({ inputText: "" })
-    return axios.post(window.location.origin + "/api/Server/sendcommand", { ServerName: this.state.ServerName, Command: message });
-  }
-
-  areaOnChange = (e) => {
-    this.setState({ inputText: e.target.value });
-  }
-
-  onStartServer = () => {
-    axios.post(window.location.origin + "/api/Server/runserver", { ServerName: this.state.ServerName }).then(p => {
-      console.log(p);
-      if (p.data === true)
-        this.props.sendNotify("tr", "success", "Сервер успешно запущен", "pe-7s-power");
-      else
-        this.props.sendNotify("tr", "error", "Произошла ошибка", "pe-7s-tools");
-
-    }).then(() => {
-      axios.post(window.location.origin + "/api/Server/subscribesignalrserver", { ServerName: this.state.ServerName }).then(() => {
-      })
-    });
-  }
-
-
-  OnStopServer = () => {
-    axios.post(window.location.origin + "/api/Server/killserver", { ServerName: this.state.ServerName }).then(p => {
-      if (p.data === true) {
-        this.props.sendNotify("tr", "warning", "Процесс сервера был убит. (Экстренное выключение)", "pe-7s-power");
+      if (connectionRef.current) {
+        connectionRef.current.off();
+        connectionRef.current.stop();
       }
-      else {//info, warning, error, success
-        this.props.sendNotify("tr", "error", "Произошла ошибка", "pe-7s-tools");
-      }
-    });
-  }
 
-  componentDidUpdate = () => {
-    if (this.state.autoScroll === true) {
+      console.log("DISCONNECT");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (autoScroll === true) {
       let parent_out = document.getElementById("ServerConsoleOut");
       parent_out.scrollTop = parent_out.scrollHeight;
     }
+  }, [lastCountOfMessages]);
+
+  const onStartServer = () => {
+    axios.post(window.location.origin + "/api/Server/runserver", { ServerName: serverName })
+      .then(p => {
+        if (p.data === true)
+          props.sendNotify("tr", "success", "Сервер успешно запущен", "pe-7s-power");
+        else
+          props.sendNotify("tr", "error", "Произошла ошибка", "pe-7s-tools");
+      })
+      .then(() => {
+        axios.post(window.location.origin + "/api/Server/subscribesignalrserver", { ServerName: serverName })
+          .then(() => {
+            if (mountedRef.current) { // Проверяем, существует ли компонент перед обновлением состояния
+              setServerStatus(prevStatus => ({
+                ...prevStatus,
+                isWorking: true
+              }));
+            }
+          });
+      });
+  };
+
+  const onStopServer = () => {
+    axios.post(window.location.origin + "/api/Server/stopserver", { ServerName: serverName })
+      .then(p => {
+        if (p.data === true)
+          props.sendNotify("tr", "success", "Сервер успешно остановлен", "pe-7s-power");
+        else
+          props.sendNotify("tr", "error", "Произошла ошибка", "pe-7s-tools");
+      })
+      .then(() => {
+        axios.post(window.location.origin + "/api/Server/subscribesignalrserver", { ServerName: serverName })
+          .then(() => {
+            if (mountedRef.current) { // Проверяем, существует ли компонент перед обновлением состояния
+              setServerStatus(prevStatus => ({
+                ...prevStatus,
+                isWorking: false
+              }));
+            }
+          });
+      });
+  };
+
+  const sendCommandStop = () => {
+    props.sendNotify("tr", "success", "Команда на выполение остановки сервера отправлена. Ожидайте ответа сервера.", "pe-7s-power");
+    SendMessage("stop");
   }
 
-  componentWillUnmount = () => {
-    if (this.state.currentInterval != null)
-      clearInterval(this.state.currentInterval);
+  const areaOnChange = (e) => {
+    setInputText(e.target.value);
   }
 
-  SendCommandStop = () => {
-    this.props.sendNotify("tr", "success", "Команда на выполение остановки сервера отправлена. Ожидайте ответа сервера.", "pe-7s-power");
-    this.SendMessage("stop");
+  const OnKeyDown = (e) => {
+    if (e.keyCode === 13 && e.shiftKey === false) {
+      e.preventDefault();
+      SendMessage(inputText);
+    }
   }
 
-  render() {
+  const SendMessage = (message) => {
+    setInputText("");
+    return axios.post(window.location.origin + "/api/Server/sendcommand", { ServerName: serverName, Command: message });
+  }
 
-    let item = this.state.ServerStatus;
-    return (
-      <div>
-        {this.state.IsNotCorrect === true ? <Redirect to="/" /> : ""}
-        <h5 style={{ fontWeight: "bold" }}>Консоль сервера: <span style={{ textDecoration: "underline", color: "#AA0000", fontWeight: "bold" }}>{item.serverName}</span></h5>
-        <br />
-        <h6>{"IP сервера: " + item.serverIp}</h6>
-        <h6><span>Статус: {item.isWorking === true ? <span style={{ color: "#55FF55" }}>Работает</span> : <span style={{ color: "#FF5555" }}>Выключен</span>}</span></h6>
-        <h6>{"Онлайн: " + item.currentOnline + " из " + item.maxOnline}</h6>
-        <h6>{"Версия сервера: " + item.serverVersion}</h6>
-        <h6>{"MOTD сервера: " + item.serverMotd}</h6>
-        <h6>{"Выделено ОЗУ: " + (item.allocatedMemmory / (1024 * 1024)) + " МБ"}</h6>
-        <h6>{"Потребление ОЗУ: " + (item.memmoryUsage / (1024 * 1024)) + " МБ"}</h6>
-        <br />
+  const GetStatus = (serverName) => {
+    axios.get(window.location.origin + "/api/Server/getserverstatus/" + serverName)
+      .then(p => {
+        if (mountedRef.current) { // Проверяем, существует ли компонент перед обновлением состояния
+          setServerStatus(p.data);
+        }
+      });
+  };
 
-        <ul className="ServerConsoleOut" id="ServerConsoleOut">
-          {/* {this.RenderMessages()} */}
+  if (isNotCorrect)
+    return <Redirect to="/" />;
 
-        </ul>
-        <div className="console-input-block">
-          <div className="input-control">
-            <textarea className="form-control" placeholder="Ввести команду (Enter для отправки сообщения)" value={this.state.inputText} onKeyDown={this.OnKeyDown} onChange={this.areaOnChange}></textarea>
-            <div onClick={() => this.SendMessage(this.state.inputText)} className="pe-7s-paper-plane sendButton"></div>
+  return (
+    <div>
+      {isNotCorrect === true ? <Redirect to="/" /> : ""}
+      <h5 style={{ fontWeight: "bold" }}>Консоль сервера: <span style={{ textDecoration: "underline", color: "#AA0000", fontWeight: "bold" }}>{serverStatus.serverName}</span></h5>
+      <br />
+      <h6>{"IP сервера: " + serverStatus.serverIp}</h6>
+      <h6><span>Статус: {serverStatus.isWorking === true ? <span style={{ color: "#55FF55" }}>Работает</span> : <span style={{ color: "#FF5555" }}>Выключен</span>}</span></h6>
+      <h6>{"Онлайн: " + serverStatus.currentOnline + " из " + serverStatus.maxOnline}</h6>
+      <h6>{"Версия сервера: " + serverStatus.serverVersion}</h6>
+      <h6>{"MOTD сервера: " + serverStatus.serverMotd}</h6>
+      <h6>{"Выделено ОЗУ: " + (serverStatus.allocatedMemmory / (1024 * 1024)) + " МБ"}</h6>
+      <h6>{"Потребление ОЗУ: " + (serverStatus.memmoryUsage / (1024 * 1024)) + " МБ"}</h6>
+      <br />
+
+      <ul className="ServerConsoleOut" id="ServerConsoleOut">
+        {/* Консоль */}
+      </ul>
+
+      <div className="console-input-block">
+        <div className="input-control">
+          <textarea className="form-control" placeholder="Ввести команду (Enter для отправки сообщения)" value={inputText} onKeyDown={OnKeyDown} onChange={areaOnChange}></textarea>
+          <div onClick={() => SendMessage(inputText)} className="pe-7s-paper-plane sendButton"></div>
+        </div>
+        <div className="control">
+          <div className="buttons">
+            <button className="btn btn-success" onClick={onStartServer} disabled={serverStatus.isWorking}>Запустить сервер</button>
+            <button className="btn btn-warning" onClick={sendCommandStop} disabled={!serverStatus.isWorking}>Безопасное отключение сервера</button>
+            <button className="btn btn-danger" onClick={onStopServer} disabled={!serverStatus.isWorking}>Экстренное выключение сервера</button>
           </div>
-          <div className="control">
-            <div className="buttons">
-              <button className="btn btn-success" onClick={this.onStartServer} disabled={this.state.ServerStatus.isWorking}>Запустить сервер</button>
-              <button className="btn btn-warning" onClick={this.SendCommandStop} disabled={this.state.ServerStatus.isWorking === false ? true : false}>Безопасное отключение сервера</button>
-              <button className="btn btn-danger" onClick={this.OnStopServer} disabled={this.state.ServerStatus.isWorking === false ? true : false}>Экстренное выключение сервера</button>
-            </div>
-            <div class="form-check">
-              <input onChange={() => {
-                this.setState({ autoScroll: !this.state.autoScroll })
-              }} checked={this.state.autoScroll} class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
-              <label class="form-check-label" for="flexCheckDefault">
-                Авто-просмотр новых сообщений
-              </label>
-            </div>
+          <div className="form-check">
+            <input onChange={() => {
+              setAutoScroll(!autoScroll);
+            }} checked={autoScroll} className="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
+            <label className="form-check-label" htmlFor="flexCheckDefault">
+              Авто-просмотр новых сообщений
+            </label>
           </div>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default ServerHandler;

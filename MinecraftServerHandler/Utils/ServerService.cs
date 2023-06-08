@@ -107,7 +107,7 @@ namespace MinecraftServerHandler.Utils
             try
             {
                 ServerHandler current_server = serverHandlers.FirstOrDefault(p => p.ServerConfig.ServerName == query.ServerName);
-                if (current_server == null)
+                if (current_server == null || current_server.ServerProcess == null)
                     return false;
                 StreamWriter input = current_server.ServerProcess.StandardInput;
                 string command = query.Command;
