@@ -10,14 +10,14 @@
 - Раздел ColorTags отвечает за определение цветов текста консольного вывода.
 - Раздел MinecraftServers позволяет задать конфигурацию сервера для запуска приложения. Эти параметры должны совпадать с параметрами вашнго сервера.
 
-JavaHandler - назначение исполняющего приложения java
-Arguments - параметры запуска сервера
-WorkingDirectory - папка, в которой находиться корень вашего сервера
-ServerName - отображаемое имя сервера
-ServerIp - ip сервера, используется для отображения и мониторинга сервера
-ServerPort - порт работы сервера, используется для отображения и мониторинга сервера
-ServerCore - имя файла (с расширением) исполняющего файла сервера
-SchemDirectory - папка управления схематиков сервера (Доступно при использовании плагина WorldEdit)
+- JavaHandler - назначение исполняющего приложения java
+- Arguments - параметры запуска сервера
+- WorkingDirectory - папка, в которой находиться корень вашего сервера
+- ServerName - отображаемое имя сервера
+- ServerIp - ip сервера, используется для отображения и мониторинга сервера
+- ServerPort - порт работы сервера, используется для отображения и мониторинга сервера
+- ServerCore - имя файла (с расширением) исполняющего файла сервера
+- SchemDirectory - папка управления схематиков сервера (Доступно при использовании плагина WorldEdit)
 
 Возможности:
 - Отслеживание потребление ОЗУ процессом сервера
@@ -47,14 +47,14 @@ First of all you need to set up config.js
 - The ColorTags section is responsible for defining the colors of the console output text.
 - The MinecraftServers section allows you to set the server configuration for running the application. These settings must match your server settings.
 
-JavaHandler - assignment of the executing java application
-Arguments - server startup parameters
-WorkingDirectory - folder where the root of your server is located
-ServerName - server display name
-ServerIp - server ip, used to display and monitor the server
-ServerPort - server operation port, used to display and monitor the server
-ServerCore - file name (with extension) of the server executable file
-SchemDirectory - server schema management folder (Available when using the WorldEdit plugin)
+- JavaHandler - assignment of the executing java application
+- Arguments - server startup parameters
+- WorkingDirectory - folder where the root of your server is located
+- ServerName - server display name
+- ServerIp - server ip, used to display and monitor the server
+- ServerPort - server operation port, used to display and monitor the server
+- ServerCore - file name (with extension) of the server executable file
+- SchemDirectory - server schema management folder (Available when using the WorldEdit plugin)
 
 Possibilities:
 - Tracking the RAM consumption of the server process
